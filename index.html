@@ -6,8 +6,6 @@
     <style>
         body { margin: 0; overflow: hidden; background-color: #000000; font-family: 'Inter', sans-serif; color: #fff; }
         #canvas-container { width: 100vw; height: 100vh; position: absolute; top: 0; left: 0; z-index: 1; }
-        
-        /* Panneau UI Futuriste (Glassmorphism) */
         .ui-panel {
             position: absolute; top: 20px; right: 20px; z-index: 10;
             width: 350px; background: rgba(15, 15, 20, 0.75);
@@ -16,33 +14,28 @@
         }
         h2 { font-size: 1.2rem; margin-top: 0; color: #38ef7d; letter-spacing: 1px; }
         p { font-size: 0.9rem; color: #aaa; line-height: 1.5; }
-        
-        /* Boutons de Quiz / Navigation */
         .btn {
-            background: linear-gradient(135deg, #00ff, #0072ff);
+            background: linear-gradient(135deg, #00FFFF, #0072ff);
             border: none; color: white; padding: 10px 16px;
             border-radius: 8px; cursor: pointer; width: 100%; font-weight: 600; margin-top: 10px;
             transition: opacity 0.2s;
         }
         .btn:hover { opacity: 0.9; }
     </style>
+    <!-- Importation de Three.js -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <!-- Importation des contrôles 360 -->
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
 </head>
 <body>
-
-    <!-- Zone de rendu 3D -->
     <div id="canvas-container"></div>
-
-    <!-- Interface d'information et Quiz -->
     <div class="ui-panel" id="info-panel">
         <h2 id="part-title">Système Cardiovasculaire</h2>
         <p id="part-desc">Clique sur un élément 3D pour afficher ses données médicales détaillées et lancer un quiz interactif.</p>
         <button class="btn" onclick="startQuiz()">Lancer le Quiz Minute</button>
     </div>
 
-    <!-- Importation de Three.js pour la 3D -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
     <script>
-        // Initialisation de la scène 3D
         const container = document.getElementById('canvas-container');
         const scene = new THREE.Scene();
         const camera = new THREE.PerspectiveCamera(60, window.innerWidth / window.innerHeight, 0.1, 1000);
@@ -51,14 +44,18 @@
         renderer.setSize(window.innerWidth, window.innerHeight);
         container.appendChild(renderer.domElement);
 
-        // Lumière futuriste
+        // Activation des contrôles à 360 degrés
+        const controls = new THREE.OrbitControls(camera, renderer.domElement);
+        controls.enableDamping = true; // Rendre les mouvements fluides
+
+        // Lumières
         const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
         scene.add(ambientLight);
         const pointLight = new THREE.PointLight(0x00c6ff, 2);
         pointLight.position.set(5, 5, 5);
         scene.add(pointLight);
 
-        // Exemple d'objet 3D anatomique simplifié (Sphère représentant le cœur/cerveau pour démarrer)
+        // Objet 3D principal
         const geometry = new THREE.IcosahedronGeometry(1.5, 2);
         const material = new THREE.MeshStandardMaterial({ 
             color: 0x0072ff, 
@@ -70,23 +67,24 @@
 
         camera.position.z = 5;
 
-        // Animation fluide
+        // Boucle d'animation
         function animate() {
             requestAnimationFrame(animate);
             organMesh.rotation.y += 0.005;
             organMesh.rotation.x += 0.002;
+            controls.update(); // Mise à jour obligatoire des contrôles 360
             renderer.render(scene, camera);
         }
         animate();
 
-        // Fonction Quiz interactive de démonstration
+        // Fonction Quiz
         function startQuiz() {
             document.getElementById('part-title').innerText = "Quiz Anatomie";
             document.getElementById('part-desc').innerText = "Question : Quel est le rôle principal de cet organe dans le système circulatoire ?\n\n1. Pomper le sang\n2. Filtrer l'air";
         }
 
         // Adaptation de la fenêtre si redimensionnée
-        window.addEventListener('window', () => {
+        window.addEventListener('resize', () => {
             camera.aspect = window.innerWidth / window.innerHeight;
             camera.updateProjectionMatrix();
             renderer.setSize(window.innerWidth, window.innerHeight);
